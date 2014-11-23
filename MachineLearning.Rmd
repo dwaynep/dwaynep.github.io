@@ -1,0 +1,89 @@
+---
+title: "Regression Models Course Project"
+author: "Dwayne Pindling"
+date: "Sunday, November 23rd, 2014"
+output: html_document
+---
+
+##Executive Summary
+The goal of this project is to predict the manner in which individuals did the exercise utilizing accelerometers.The following report will document the following:
+
+1)How the prediction model was built 
+2)How/if cross validation was used
+3)Explanation of choices made
+4)Expected sample of error
+
+##Background
+Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement - a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, your goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here: http://groupware.les.inf.puc-rio.br/har (see the section on the Weight Lifting Exercise Dataset). 
+
+
+
+##Data Manipulation
+To begin with, we will load the packages that will be used
+
+```{r}
+library(caret)
+library(kernlab)
+library(randomForest)
+```
+The next step is to download and load the data we will be working with.
+Upon the loading of the dataset, we ensure to convert all zero values to 'NA' and eliminate any unnecessary values.
+
+```{r}
+download.file(url = "http://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv", 
+destfile = "Training.csv")
+download.file(url = "http://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv", 
+destfile = "Test.csv")
+Training <- read.csv("Training.csv", na.strings=c("NA","#DIV/0!", ""))
+Test <- read.csv("Test.csv", na.strings=c("NA","NULL", ""))
+```
+
+We will now remove all column that containing 'NA' values. 
+These columns are not useful for calculating  our model.
+
+```{r}
+updatedtraining <- Training[ , colSums(is.na(Training))==0]
+```
+
+
+Next, we remove columns that are not usefull in calculating our model.
+
+```{r}
+updatedtraining <- updatedtraining[,-c(1,2,5,6)]
+```
+
+
+Finally, we partition the data into two sets to end our data manipulation
+
+```{r}
+inTrain <- createDataPartition(y=updatedtraining$classe, p=0.80, list=FALSE)
+```
+
+
+##Model Training
+
+```{r}
+training <- updatedtraining[inTrain,]
+testing <- updatedtraining[-inTrain,]
+```
+
+
+
+##Creation of Data Model
+
+```{r}
+set.seed(9875)
+modelFit <- train(training$classe ~ ., data = training, method="rf")
+```
+
+
+##Final Prediction
+```{r}
+prediction <-predict(modelFit, testing, type = "class")
+prediction
+```
+
+##Conclusions & Assumptions
+1.As we are using Random Forest, there is no need for cross-validation or a seperate test set to get an unbiased estimate of the test set error, it is estimated internally.
+More information can be found at the following link: http://www.stat.berkeley.edu/~breiman/RandomForests/cc_home.htm
+
