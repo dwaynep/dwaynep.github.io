@@ -1,5 +1,5 @@
 ---
-title: "Regression Models Course Project"
+title: "Prediction Models Course Project"
 author: "Dwayne Pindling"
 date: "Sunday, November 23rd, 2014"
 output: html_document
@@ -74,12 +74,13 @@ testing <- updatedtraining[-inTrain,]
 ```{r}
 set.seed(9875)
 modelFit <- train(training$classe ~ ., data = training, method="rf")
+modelFit
 ```
 
 
 ##Final Prediction
 ```{r}
-prediction <-predict(modelFit, testing, type = "class")
+prediction <-predict(modelFit, Test)
 prediction
 ```
 
